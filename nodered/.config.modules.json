@@ -1,0 +1,8 @@
+{
+    "webuntis": {
+        "spec": "webuntis",
+        "module": "webuntis",
+        "builtin": false,
+        "known": false
+    }
+}
