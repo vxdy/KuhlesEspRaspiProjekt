@@ -1,0 +1,134 @@
+- name: Setup Ubuntu from scratch
+  hosts: all
+  become: true
+  vars_files:
+    - "vault.yml"
+  vars:
+    ansible_ssh_pass: "{{ password }}" # Password from the vault is set here as the ssh password
+    ansible_become_pass: "{{ password }}" 
+
+  tasks:
+
+  # - name: Apt update and upgrade
+  #   apt:
+  #     upgrade: "yes"
+  #     update_cache: yes
+
+  - name: Create the user oskar
+    user:
+      name: oskar
+      password: "{{ password | password_hash('sha512', 'somecrazysalt') }}" # Password is encrypted again to be set as the user password in ubuntu
+      groups:
+        - sudo
+      shell: /usr/bin/fish
+      state: present
+
+  - name: Create other users
+    user:
+      name: bigd
+      groups:
+        - sudo
+      password_expire_max: 0
+      state: present
+
+  - name: Create other users
+    user:
+      name: quentin
+      groups:
+        - sudo
+      password_expire_max: 0
+      state: present
+
+  - name: Create hushlogin
+    file:
+      path: /home/oskar/.hushlogin
+      state: touch
+      modification_time: preserve
+      access_time: preserve
+
+  - name: Add SSH public key for user
+    authorized_key:
+      user: oskar
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+      state: present
+
+  - name: Add SSH public key for user
+    authorized_key:
+      user: quentin
+      key: "{{ lookup('file', '/home/oskar/own/ansible/ssh_keys/quentin.pub') }}"
+      state: present
+
+  - name: Change host name
+    hostname:
+      name: "{{ inventory_hostname }}"
+
+  - name: Set timezone
+    timezone:
+      name: Europe/Berlin
+
+  - name: Add Fish shell repo
+    apt_repository:
+      repo: ppa:fish-shell/release-3
+      state: present
+
+  - name: Install packages
+    apt:
+      pkg:
+      - fish
+      - neovim
+      - exa
+      - neofetch
+      - peco
+      update_cache: yes
+      state: present
+
+  - name: Check if new config exists
+    stat:
+      path: /home/oskar/.config/fish
+    register: config_exists
+
+  - name: Remove existing config foler
+    file:
+      path: /home/oskar/.config
+      state: absent
+    when: not config_exists.stat.exists
+
+  - name: Get new config
+    git:
+      repo: "https://github.com/Gizmo2109/dotfiles.git"
+      dest: /home/oskar/.config
+      update: no
+
+  - name: Cange config folder permission
+    file:
+      dest: /home/oskar/.config
+      owner: oskar
+      group: oskar
+      recurse: yes
+  
+  - name: Remove old sshd config
+    file:
+      path: /etc/ssh/sshd_config
+      state: absent
+  
+  - name: Copy new sshd config
+    copy:
+      src: ./files/sshd_config
+      dest: /etc/ssh/sshd_config
+
+  - name: Restart ssh service
+    service:
+      name: ssh
+      state: reloaded
+
+  - name: Reboot now
+    reboot:
+
+    # Todo command
+    # NVIM:
+    # curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    # then in nvim :PlugInstall
+
+    # OTHER:
+    # docker install !!!!!!
+    # Maybe docker swarm 
