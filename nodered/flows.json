@@ -1,0 +1,595 @@
+[
+    {
+        "id": "b130f2d66552c3df",
+        "type": "tab",
+        "label": "Humi / Temp",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "c6d6bb1ca38577a4",
+        "type": "tab",
+        "label": "Untis",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "0441e3ed50445647",
+        "type": "mqtt-broker",
+        "name": "mqtt docker server",
+        "broker": "BigPi",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "260f69a1977e5d86",
+        "type": "influxdb",
+        "hostname": "BigPi",
+        "port": "8086",
+        "protocol": "http",
+        "database": "database",
+        "name": "influx docker",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://bigPi:8086",
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "ec21108c75c10992",
+        "type": "mqtt in",
+        "z": "b130f2d66552c3df",
+        "name": "Höre auf esp/out/temp",
+        "topic": "esp/out/temp",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "0441e3ed50445647",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 240,
+        "y": 200,
+        "wires": [
+            [
+                "fd5e48d57b56e22a",
+                "15593c09065056d8"
+            ]
+        ]
+    },
+    {
+        "id": "241943f171313b8d",
+        "type": "mqtt in",
+        "z": "b130f2d66552c3df",
+        "name": "Höre auf esp/out/humi",
+        "topic": "esp/out/humi",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "0441e3ed50445647",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 240,
+        "y": 140,
+        "wires": [
+            [
+                "fd5e48d57b56e22a",
+                "14986434065b288d"
+            ]
+        ]
+    },
+    {
+        "id": "5c2ea284176ae91f",
+        "type": "influxdb out",
+        "z": "b130f2d66552c3df",
+        "influxdb": "260f69a1977e5d86",
+        "name": "influx write humi",
+        "measurement": "humi",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "tolleOrg",
+        "bucket": "esp",
+        "x": 780,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "f5f66adf630b977c",
+        "type": "influxdb out",
+        "z": "b130f2d66552c3df",
+        "influxdb": "260f69a1977e5d86",
+        "name": "influx write temp",
+        "measurement": "temp",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "tolleOrg",
+        "bucket": "esp",
+        "x": 780,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "8da5906fea26f07c",
+        "type": "inject",
+        "z": "b130f2d66552c3df",
+        "name": "Alle 10 Sekunden",
+        "props": [],
+        "repeat": "10",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 230,
+        "y": 400,
+        "wires": [
+            [
+                "aeb1b7fbdcc5d7b4",
+                "116865668952c5fa"
+            ]
+        ]
+    },
+    {
+        "id": "aeb1b7fbdcc5d7b4",
+        "type": "influxdb in",
+        "z": "b130f2d66552c3df",
+        "influxdb": "260f69a1977e5d86",
+        "name": "influx read Temps",
+        "query": "from(bucket:\"esp\")\n    |> range(start: -15m)\n    |> filter(fn: (r) =>\n        r._measurement == \"temp\"\n    )\n",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "tolleOrg",
+        "x": 450,
+        "y": 360,
+        "wires": [
+            [
+                "ef7e74d7f8a9be87"
+            ]
+        ]
+    },
+    {
+        "id": "fd5e48d57b56e22a",
+        "type": "debug",
+        "z": "b130f2d66552c3df",
+        "name": "debug 6",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 500,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "ef7e74d7f8a9be87",
+        "type": "function",
+        "z": "b130f2d66552c3df",
+        "name": "Get avg of Temp",
+        "func": "let payload = msg.payload;\n\nlet add = parseFloat(0);\nlet count = 0;\n\npayload.forEach(function(element) {\n    count++;\n    add = parseFloat(add) + parseFloat(element._value);\n});\n\nlet avg = add / count;\n\nmsg.payload = avg.toFixed(1);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 360,
+        "wires": [
+            [
+                "4797530e363caffd",
+                "4a57723f8c8abda2"
+            ]
+        ]
+    },
+    {
+        "id": "116865668952c5fa",
+        "type": "influxdb in",
+        "z": "b130f2d66552c3df",
+        "influxdb": "260f69a1977e5d86",
+        "name": "influx read Humis",
+        "query": "from(bucket:\"esp\")\n    |> range(start: -15m)\n    |> filter(fn: (r) =>\n        r._measurement == \"humi\"\n    )\n",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "tolleOrg",
+        "x": 450,
+        "y": 440,
+        "wires": [
+            [
+                "16c638c1b3d081a1"
+            ]
+        ]
+    },
+    {
+        "id": "16c638c1b3d081a1",
+        "type": "function",
+        "z": "b130f2d66552c3df",
+        "name": "Get avg of Humi",
+        "func": "let payload = msg.payload;\n\nlet add = parseFloat(0);\nlet count = 0;\n\npayload.forEach(function(element) {\n    count++;\n    add = parseFloat(add) + parseFloat(element._value);\n});\n\nlet avg = add / count;\n\nmsg.payload = avg.toFixed(1);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 440,
+        "wires": [
+            [
+                "34f6ff8ad01c1190",
+                "4a57723f8c8abda2"
+            ]
+        ]
+    },
+    {
+        "id": "a91caa42c6c1ea6e",
+        "type": "debug",
+        "z": "b130f2d66552c3df",
+        "name": "debug 7",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 760,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "14986434065b288d",
+        "type": "switch",
+        "z": "b130f2d66552c3df",
+        "name": "Check for NaN",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "NaN",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 520,
+        "y": 140,
+        "wires": [
+            [
+                "a91caa42c6c1ea6e"
+            ],
+            [
+                "5c2ea284176ae91f"
+            ]
+        ]
+    },
+    {
+        "id": "15593c09065056d8",
+        "type": "switch",
+        "z": "b130f2d66552c3df",
+        "name": "Check for NaN",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "NaN",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 520,
+        "y": 200,
+        "wires": [
+            [
+                "a91caa42c6c1ea6e"
+            ],
+            [
+                "f5f66adf630b977c"
+            ]
+        ]
+    },
+    {
+        "id": "4797530e363caffd",
+        "type": "mqtt out",
+        "z": "b130f2d66552c3df",
+        "name": "Temp to esp",
+        "topic": "esp/in/temp",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "0441e3ed50445647",
+        "x": 870,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "34f6ff8ad01c1190",
+        "type": "mqtt out",
+        "z": "b130f2d66552c3df",
+        "name": "Humi to esp",
+        "topic": "esp/in/humi",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "0441e3ed50445647",
+        "x": 870,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "4a57723f8c8abda2",
+        "type": "debug",
+        "z": "b130f2d66552c3df",
+        "name": "debug 5",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 860,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "4f1434407beeb1cc",
+        "type": "http request",
+        "z": "c6d6bb1ca38577a4",
+        "name": "Request auth token",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://borys.webuntis.com/WebUntis/jsonrpc.do?school=oppenheimer-schule",
+        "tls": "",
+        "persist": true,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "other",
+                "keyValue": "Content-Type",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 630,
+        "y": 40,
+        "wires": [
+            [
+                "c9d1d2a355f873e8"
+            ]
+        ]
+    },
+    {
+        "id": "402ed25bfb2998e6",
+        "type": "inject",
+        "z": "c6d6bb1ca38577a4",
+        "name": "Start Untis Api request and esp send",
+        "props": [],
+        "repeat": "120",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 190,
+        "y": 40,
+        "wires": [
+            [
+                "c95c3e24a51536d2"
+            ]
+        ]
+    },
+    {
+        "id": "c95c3e24a51536d2",
+        "type": "template",
+        "z": "c6d6bb1ca38577a4",
+        "name": "set payload",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "plain",
+        "template": "{\n    \"id\": \"ID\",\n    \"method\": \"authenticate\",\n    \"params\": {\n        \"user\": \"q.thees\",\n        \"password\": \"SbRdR737\",\n        \"client\": \"CLIENT\"\n    },\n    \"jsonrpc\": \"2.0\"\n}\n\n\n\n{\n    \"id\": \"req-002\",\n    \"method\": \"getTimetable\",\n    \"params\": {\n        \"id\": 71,\n        \"type\": 1\n    },\n    \"jsonrpc\": \"2.0\"\n}",
+        "output": "str",
+        "x": 430,
+        "y": 40,
+        "wires": [
+            [
+                "4f1434407beeb1cc"
+            ]
+        ]
+    },
+    {
+        "id": "c9d1d2a355f873e8",
+        "type": "change",
+        "z": "c6d6bb1ca38577a4",
+        "name": "set cookie and payload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"id\":\"1\",\"method\":\"getTimetable\",\"params\":{\"options\":{\"element\":{\"id\":\"11760\",\"type\":5},\"onlyBaseTimetable\":false,\"showStudentgroup\":true,\"showLsText\":true,\"showLsNumber\":true,\"showInfo\":true,\"showBooking\":true,\"showSubstText\":true,\"klasseFields\":[\"name\",\"longname\",\"externalkey\"],\"teacherFields\":[\"name\",\"longname\",\"externalkey\"],\"roomFields\":[\"name\",\"longname\",\"externalkey\"],\"subjectFields\":[\"name\",\"longname\",\"externalkey\"]}},\"jsonrpc\":\"2.0\"}",
+                "tot": "json"
+            },
+            {
+                "t": "set",
+                "p": "cookies",
+                "pt": "msg",
+                "to": "responseCookies",
+                "tot": "msg",
+                "dc": true
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 160,
+        "y": 120,
+        "wires": [
+            [
+                "16082f826e3daf14"
+            ]
+        ]
+    },
+    {
+        "id": "16082f826e3daf14",
+        "type": "http request",
+        "z": "c6d6bb1ca38577a4",
+        "name": "request timetable",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://borys.webuntis.com/WebUntis/jsonrpc.do?school=oppenheimer-schule",
+        "tls": "",
+        "persist": true,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "other",
+                "keyValue": "Content-Type",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 390,
+        "y": 120,
+        "wires": [
+            [
+                "35cec509225b1514"
+            ]
+        ]
+    },
+    {
+        "id": "35cec509225b1514",
+        "type": "function",
+        "z": "c6d6bb1ca38577a4",
+        "name": "extract data",
+        "func": "var json = JSON.parse(msg.payload);\n\nvar currentDate = new Date();\nvar currentHour = currentDate.getHours();\nvar currentMinute = (currentDate.getMinutes() < 10 ? '0' : '') + currentDate.getMinutes()\nvar timeNow = currentHour + currentMinute;\nvar data = [];\n\nfor (let i = 0; i < json[\"result\"].length ; i++) {\n    if (json.result[i].startTime <= timeNow && json.result[i].endTime >= timeNow) {\n        data.push(json.result[i]);\n    }\n}\nmsg.payload = data;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 590,
+        "y": 120,
+        "wires": [
+            [
+                "96a7fbbdd65e567e",
+                "3267fb630b0b2611"
+            ]
+        ]
+    },
+    {
+        "id": "96a7fbbdd65e567e",
+        "type": "function",
+        "z": "c6d6bb1ca38577a4",
+        "name": "Extract data",
+        "func": "let data = {};\n\nif (msg.payload[0][\"kl\"].length > 0) {\n    data.klasse = msg.payload[0][\"kl\"][0][\"name\"];\n} else {\n    data.klasse = \"\";\n}\n\nif (msg.payload[0][\"te\"].length > 0) {\n    data.lehrer = msg.payload[0][\"te\"][0][\"name\"];\n} else {\n    data.lehrer = \"\";\n}\n\nif (msg.payload[0][\"su\"].length > 0) {\n    data.fach = msg.payload[0][\"su\"][0][\"name\"];\n} else {\n    data.fach = \"\";\n}\n\nif (msg.payload[0][\"ro\"].length > 0) {\n    data.raum = msg.payload[0][\"ro\"][0][\"name\"];\n} else {\n    data.raum = \"\";\n}\n\n\nmsg.payload = data;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 130,
+        "y": 220,
+        "wires": [
+            [
+                "3090de9ff78fc8f7"
+            ]
+        ]
+    },
+    {
+        "id": "3090de9ff78fc8f7",
+        "type": "mqtt out",
+        "z": "c6d6bb1ca38577a4",
+        "name": "Data to esp",
+        "topic": "esp/in/data",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "0441e3ed50445647",
+        "x": 350,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "3267fb630b0b2611",
+        "type": "debug",
+        "z": "c6d6bb1ca38577a4",
+        "name": "debug",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 770,
+        "y": 120,
+        "wires": []
+    }
+]

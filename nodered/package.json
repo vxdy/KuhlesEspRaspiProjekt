@@ -1,0 +1,11 @@
+{
+    "name": "node-red-project",
+    "description": "A Node-RED Project",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "node-red-contrib-function-npm": "~0.4.3",
+        "node-red-contrib-influxdb": "~0.6.1",
+        "webuntis": "^2.0.3"
+    }
+}
